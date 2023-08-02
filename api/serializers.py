@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Students, Teachers, Topic
+from api.models import Students, Teachers, Topic, TopicList
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -29,8 +29,8 @@ class TopicSerializer(serializers.ModelSerializer):
     #     validated_data['teacherName_id'] = teacher_id  # 将额外字段及其值添加到validated_data
     #     return super().create(validated_data)
 
-# class TopicListSerializer(serializers.ModelSerializer):
-#     """论文选题序列化器"""
-#     class Meta:
-#         model = TopicList
-#         fields = '__all__'
+class TopicListSerializer(serializers.ModelSerializer):
+    """论文选题序列化器"""
+    class Meta:
+        model = TopicList
+        fields = '__all__'

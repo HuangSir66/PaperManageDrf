@@ -14,8 +14,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from api import models
 
-from api.models import Students, Teachers, Topic
-from api.serializers import StudentSerializer, TeacherSerializer, TopicSerializer
+from api.models import Students, Teachers, Topic, TopicList
+from api.serializers import StudentSerializer, TeacherSerializer, TopicSerializer, TopicListSerializer
 
 from api.utils.pagination import MyPaginator
 
@@ -106,7 +106,7 @@ class TeacherView(ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 class TopicView(ModelViewSet):
-    """教师视图"""
+    """论文视图"""
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
     pagination_class = MyPaginator
@@ -131,12 +131,21 @@ class TopicView(ModelViewSet):
             page_roles = pg.paginate_queryset(queryset=top, request=request, view=self)
             bs = TopicSerializer(instance=page_roles, many=True)
             allTopic = TopicSerializer(instance=queryset,many=True)
-            return Response({'count': top.count(), 'list': bs.data,'allTop':allTopic.data})
+            teacQueryset = Topic.objects.filter(teacherName=int(request.COOKIES.get('id')))
+            teacTopic = TopicSerializer(instance=teacQueryset, many=True)
+            # print(type(teacTopic),'TeacherTopic')
+            # print(type(teacQueryset),'teacQueryset')
+            # print(type(queryset),'queryset')
+            # print(type(allTopic),'allTopic')
+            return Response({'count': top.count(), 'list': bs.data,'allTop':allTopic.data,'teacQueryset':teacTopic.data})
         else:
             page_roles = pg.paginate_queryset(queryset=queryset, request=request, view=self)
             bs = TopicSerializer(instance=page_roles, many=True)
             allTopic = TopicSerializer(instance=queryset,many=True)
-            return Response({'count': queryset.count(), 'list': bs.data,'allTop':allTopic.data})
+            # print(type(request.COOKIES.get('id')))
+            teacQueryset = Topic.objects.filter(teacherName=int(request.COOKIES.get('id')))
+            teacTopic = TopicSerializer(instance=teacQueryset, many=True)
+            return Response({'count': queryset.count(), 'list': bs.data,'allTop':allTopic.data,'teacQueryset':teacTopic.data})
     def create(self, request, *args, **kwargs):
         print(request.data)
         return super().create(request, *args, **kwargs)
@@ -341,38 +350,43 @@ class CheckTeacherExistsAPIView(APIView):
         print(existing_teacher)
         # 返回响应
         return Response({'exists': existing_teacher})
-#
-# class TopicListView(ModelViewSet):
-#     """学生选题视图"""
-#     queryset = models.TopicList.objects.all()
-#     serializer_class = TopicListSerializer
-#     pagination_class = MyPaginator
-#     def list(self, request,*args, **kwargs):
-#         # queryset = Students.objects.filter(name=)
-#         # print(request.query_params.get('name'),'name')
-#         # 创建分页对象，这里是自定义的MyPageNumberPagination
-#         # print('teacher', request.COOKIES.get('id'))
-#         queryset = TopicList.objects.all()
-#         pg = MyPaginator()
-#         # 获取分页的数据
-#
-#         data_dict = {}
-#         search_data = request.query_params.get('title', '')
-#         # 分页结果
-#         # res = paginator.paginate_queryset(books, request, self)
-#         if search_data:
-#             data_dict['title__contains'] = search_data
-#         if (request.query_params.get('name') != ''):
-#             top = TopicList.objects.filter(**data_dict)
-#             page_roles = pg.paginate_queryset(queryset=top, request=request, view=self)
-#             bs = TopicListSerializer(instance=page_roles, many=True)
-#             return Response({'count': top.count(), 'list': bs.data})
-#         else:
-#             page_roles = pg.paginate_queryset(queryset=queryset, request=request, view=self)
-#             bs = TopicListSerializer(instance=page_roles, many=True)
-#             return Response({'count': queryset.count(), 'list': bs.data})
-#
-#     def create(self, request, *args, **kwargs):
-#         print(request.data)
-#         return super().create(request, *args, **kwargs)
-#
+
+class TopicListView(ModelViewSet):
+    """学生选题视图"""
+    queryset = models.TopicList.objects.all()
+    serializer_class = TopicListSerializer
+    pagination_class = MyPaginator
+    def list(self, request,*args, **kwargs):
+        # queryset = Students.objects.filter(name=)
+        # print(request.query_params.get('name'),'name')
+        # 创建分页对象，这里是自定义的MyPageNumberPagination
+        # print('teacher', request.COOKIES.get('id'))
+        queryset = TopicList.objects.all()
+        pg = MyPaginator()
+        # 获取分页的数据
+
+        data_dict = {}
+        search_data = request.query_params.get('title', '')
+        # 分页结果
+        # res = paginator.paginate_queryset(books, request, self)
+        if search_data:
+            data_dict['title__contains'] = search_data
+        if (request.query_params.get('name') != ''):
+            top = TopicList.objects.filter(**data_dict)
+            page_roles = pg.paginate_queryset(queryset=top, request=request, view=self)
+            bs = TopicListSerializer(instance=page_roles, many=True)
+            return Response({'count': top.count(), 'list': bs.data})
+        else:
+            page_roles = pg.paginate_queryset(queryset=queryset, request=request, view=self)
+            bs = TopicListSerializer(instance=page_roles, many=True)
+            return Response({'count': queryset.count(), 'list': bs.data})
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        studentId = request.data.get('studentId','')
+        if TopicList.objects.filter(studentId = studentId).exists():
+            return Response({'error': '学生已选题'}, status=400)
+        return super().create(request, *args, **kwargs)
+
+
+

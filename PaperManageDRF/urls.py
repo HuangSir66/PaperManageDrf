@@ -23,7 +23,7 @@ router = DefaultRouter()
 router.register("api/student",views.StudentView)
 router.register('api/teacher',views.TeacherView)
 router.register('api/topic',views.TopicView)
-# router.register('api/topiclist',views.TopicListView)
+router.register('api/topiclist',views.TopicListView)
 urlpatterns = [
     # path('api/student/', views.StudentView.as_view()),
     # re_path('api/student/(?P<pk>\d+)', views.StudentView.as_view()),

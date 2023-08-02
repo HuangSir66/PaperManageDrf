@@ -53,4 +53,8 @@ class Topic(models.Model):
     topicDirect = models.CharField(verbose_name='论文方向', max_length=32)
     maxNum = models.IntegerField(verbose_name='限定人数')
 
+class TopicList(models.Model):
+    """论文选题表"""
+    studentId = models.ForeignKey(to='Students',on_delete=models.CASCADE,verbose_name='学生id')
+    topicTitle = models.ForeignKey(to='Topic',on_delete=models.CASCADE,verbose_name='论文id')
 
